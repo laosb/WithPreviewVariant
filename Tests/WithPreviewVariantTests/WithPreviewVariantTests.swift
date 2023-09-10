@@ -142,6 +142,9 @@ final class WithPreviewVariantTests: XCTestCase {
               }
             }
             
+            protocol ItemObservableProtocol: ItemProtocol, Observable {
+            }
+            
             struct PreviewItem: ItemProtocol {
               var id: UUID = UUID()
               var name: String = ""
@@ -161,6 +164,38 @@ final class WithPreviewVariantTests: XCTestCase {
                 createdAt: Date = Date(),
                 lastUpdateAt: Date? = nil,
                 records: [PreviewItemUpdateRecord] = [],
+                isPinned: Bool = false
+              ) {
+                self.id = id
+                self.name = name
+                self.color = color
+                self.imageData = imageData
+                self.createdAt = createdAt
+                self.lastUpdateAt = lastUpdateAt
+                self.records = records
+                self.isPinned = isPinned
+              }
+            }
+            
+            @Observable class ObservablePreviewItem: ItemObservableProtocol {
+              var id: UUID = UUID()
+              var name: String = ""
+              var color: ItemColor = ItemColor.blue
+              var imageData: Data?
+              var createdAt: Date = Date()
+              var lastUpdateAt: Date?
+              var isPinned: Bool = false
+              var records: [ObservablePreviewItemUpdateRecord]?
+            
+            
+              init(
+                id: UUID = UUID(),
+                name: String,
+                color: ItemColor = .blue,
+                imageData: Data? = nil,
+                createdAt: Date = Date(),
+                lastUpdateAt: Date? = nil,
+                records: [ObservablePreviewItemUpdateRecord] = [],
                 isPinned: Bool = false
               ) {
                 self.id = id
@@ -202,6 +237,9 @@ final class WithPreviewVariantTests: XCTestCase {
               }
             }
             
+            protocol ItemUpdateRecordObservableProtocol: ItemUpdateRecordProtocol, Observable {
+            }
+            
             struct PreviewItemUpdateRecord: ItemUpdateRecordProtocol {
               var id: UUID = UUID()
               var date: Date = Date()
@@ -209,6 +247,19 @@ final class WithPreviewVariantTests: XCTestCase {
             
             
               init(id: UUID = UUID(), item: PreviewItem, date: Date = Date()) {
+                self.id = id
+                self.item = item
+                self.date = date
+              }
+            }
+            
+            @Observable class ObservablePreviewItemUpdateRecord: ItemUpdateRecordObservableProtocol {
+              var id: UUID = UUID()
+              var date: Date = Date()
+              var item: ObservablePreviewItem
+            
+            
+              init(id: UUID = UUID(), item: ObservablePreviewItem, date: Date = Date()) {
                 self.id = id
                 self.item = item
                 self.date = date
