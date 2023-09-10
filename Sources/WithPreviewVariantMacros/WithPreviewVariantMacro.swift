@@ -72,7 +72,7 @@ public struct WithPreviewVariantMacro: PeerMacro {
     
     let className = originalClassDecl.name.text
     let protocolName = "\(className)Protocol"
-    let observableProtocolName = "\(className)ObservableProtocol"
+    let observableProtocolName = "Observable\(className)"
     let previewName = "Preview\(className)"
     let observablePreviewName = "ObservablePreview\(className)"
     
@@ -86,6 +86,7 @@ public struct WithPreviewVariantMacro: PeerMacro {
     observableMembers.reserveCapacity(memberCount)
     
     var protocolAssociatedTypes: Set<String> = []
+    var observableProtocolAssociatedTypes: Set<String> = []
     var rewriteTypes: Set<String> = []
     
     var metInitDecl = false
@@ -121,6 +122,7 @@ public struct WithPreviewVariantMacro: PeerMacro {
             
             let protocolName = "\(type)Protocol"
             protocolAssociatedTypes.insert("associatedtype \(type): \(protocolName)")
+            observableProtocolAssociatedTypes.insert("associatedtype \(type): _Observable\(type)")
             
             protocolBindings.append("\(name): \(fullType) { get set }")
 
@@ -169,8 +171,16 @@ public struct WithPreviewVariantMacro: PeerMacro {
     }
     """
     
+    let internalObservableProtocolDeclString = """
+    protocol _\(observableProtocolName): AnyObject {
+      \(observableProtocolAssociatedTypes.joined(separator: "\n"))
+    
+      \(protocolMembers.joined(separator: "\n"))
+    }
+    """
+    
     let observableProtocolDeclString = """
-    protocol \(observableProtocolName): \(protocolName), Observable {}
+    typealias \(observableProtocolName) = SwiftUI.Observable & _\(observableProtocolName)
     """
     
     let structDeclString = """
@@ -180,16 +190,17 @@ public struct WithPreviewVariantMacro: PeerMacro {
     """
     
     let observableDeclString = """
-    @Observable class \(observablePreviewName): \(observableProtocolName) {
+    @Observable class \(observablePreviewName): _\(observableProtocolName) {
       \(observableMembers.joined(separator: "\n"))
     }
     """
     
     return [
       DeclSyntax(stringLiteral: protocolDeclString),
+      DeclSyntax(stringLiteral: internalObservableProtocolDeclString),
       DeclSyntax(stringLiteral: observableProtocolDeclString),
       DeclSyntax(stringLiteral: structDeclString),
-      DeclSyntax(stringLiteral: observableDeclString)
+      DeclSyntax(stringLiteral: observableDeclString),
     ]
   }
 }
