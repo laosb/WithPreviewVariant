@@ -93,7 +93,6 @@ public struct WithPreviewVariantMacro: PeerMacro {
     observableMembers.reserveCapacity(memberCount)
     
     var protocolAssociatedTypes: Set<String> = []
-    var observableProtocolAssociatedTypes: Set<String> = []
     var rewriteTypes: Set<String> = []
     
     var metInitDecl = false
@@ -127,14 +126,11 @@ public struct WithPreviewVariantMacro: PeerMacro {
           if isRelationship {
             let (beforeType, type, afterType) = try unwrapRelationshipType("", typeSyntax, "")
             let associatedType = "Associated\(type)"
-            let fullType = "\(beforeType)\(type)\(afterType)"
             let fullAssociatedType = "\(beforeType)\(associatedType)\(afterType)"
             
-            let protocolName = "\(type)Protocol"
-            protocolAssociatedTypes.insert("associatedtype \(associatedType): \(protocolName)")
-            observableProtocolAssociatedTypes.insert("associatedtype \(associatedType): _Observable\(type)")
+            protocolAssociatedTypes.insert("associatedtype \(associatedType)")
             
-            protocolBindings.append("\(name): \(associatedType) { get set }")
+            protocolBindings.append("\(name): \(fullAssociatedType) { get set }")
 
             rewriteTypes.insert(type)
 
@@ -183,7 +179,7 @@ public struct WithPreviewVariantMacro: PeerMacro {
     
     let internalObservableProtocolDeclString = """
     protocol _\(observableProtocolName): AnyObject {
-      \(observableProtocolAssociatedTypes.joined(separator: "\n"))
+      \(protocolAssociatedTypes.joined(separator: "\n"))
     
       \(protocolMembers.joined(separator: "\n"))
     }
