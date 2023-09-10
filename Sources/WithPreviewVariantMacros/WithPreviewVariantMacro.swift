@@ -59,6 +59,13 @@ func unwrapRelationshipType(_ beforeType: String = "", _ type: TypeSyntax, _ aft
   }
 }
 
+public struct InverseRelationshipMacro: PeerMacro {
+  public static func expansion(of node: AttributeSyntax, providingPeersOf declaration: some DeclSyntaxProtocol, in context: some MacroExpansionContext) throws -> [DeclSyntax] {
+    []
+  }
+}
+
+// MARK: - WithPreviewVariantMacro
 public struct WithPreviewVariantMacro: PeerMacro {
   public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
     guard
@@ -97,7 +104,8 @@ public struct WithPreviewVariantMacro: PeerMacro {
         }
         
         let isRelationship = varDecl.attributes.contains(where: { attr in
-          attr.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text == "Relationship"
+          ["Relationship", "InverseRelationship"]
+            .contains(attr.as(AttributeSyntax.self)?.attributeName.as(IdentifierTypeSyntax.self)?.name.text)
         })
         
         let bindings = varDecl.bindings
@@ -209,5 +217,6 @@ public struct WithPreviewVariantMacro: PeerMacro {
 struct WithPreviewVariantPlugin: CompilerPlugin {
   let providingMacros: [Macro.Type] = [
     WithPreviewVariantMacro.self,
+    InverseRelationshipMacro.self
   ]
 }

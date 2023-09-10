@@ -46,7 +46,7 @@ class Item {
 class ItemUpdateRecord {
   var id: UUID = UUID()
   var date: Date = Date()
-  @Relationship var item: Item
+  @InverseRelationship var item: Item
   
   init(id: UUID = UUID(), item: Item, date: Date = Date()) {
     self.id = id
