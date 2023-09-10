@@ -126,13 +126,15 @@ public struct WithPreviewVariantMacro: PeerMacro {
           
           if isRelationship {
             let (beforeType, type, afterType) = try unwrapRelationshipType("", typeSyntax, "")
+            let associatedType = "Associated\(type)"
             let fullType = "\(beforeType)\(type)\(afterType)"
+            let fullAssociatedType = "\(beforeType)\(associatedType)\(afterType)"
             
             let protocolName = "\(type)Protocol"
-            protocolAssociatedTypes.insert("associatedtype \(type): \(protocolName)")
-            observableProtocolAssociatedTypes.insert("associatedtype \(type): _Observable\(type)")
+            protocolAssociatedTypes.insert("associatedtype \(associatedType): \(protocolName)")
+            observableProtocolAssociatedTypes.insert("associatedtype \(associatedType): _Observable\(type)")
             
-            protocolBindings.append("\(name): \(fullType) { get set }")
+            protocolBindings.append("\(name): \(associatedType) { get set }")
 
             rewriteTypes.insert(type)
 
